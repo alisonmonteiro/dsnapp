@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import {
   DialogFooter,
@@ -10,31 +11,42 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Head from "next/head";
+import { createClient as createServerClient } from "@/lib/utils/supabase/server";
+import { createClient } from "@/lib/utils/supabase/component";
+import { GetServerSidePropsContext } from "next";
+import { useEffect, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const notes = [
-  {
-    id: 1,
-    title: "Office closed on July 2nd",
-    preview:
-      "Cum qui rem deleniti. Suscipit in dolor veritatis sequi aut. Vero ut earum quis deleniti. Ut a sunt eum cum ut repudiandae possimus. Nihil ex tempora neque cum consectetur dolores.",
-  },
-  {
-    id: 2,
-    title: "New password policy",
-    preview:
-      "Alias inventore ut autem optio voluptas et repellendus. Facere totam quaerat quam quo laudantium cumque eaque excepturi vel. Accusamus maxime ipsam reprehenderit rerum id repellendus rerum. Culpa cum vel natus. Est sit autem mollitia.",
-  },
-  {
-    id: 3,
-    title: "Office closed on July 2nd",
-    preview:
-      "Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.",
-  },
-];
 
-export default function Home() {
+interface Note {
+  id: number;
+  title: string;
+  text: string;
+  status: boolean;
+  uuid: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export default function Home({ user }: { user: User }) {
+  const supabase = createClient();
+  const [notes, setNotes] = useState<Note[]>([]);
+
+  useEffect(() => {
+    const fetchNotes = async () => {
+      const { data, error } = await supabase.from("notes").select("*");
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setNotes(data);
+    };
+    fetchNotes();
+  }, []);
+
   return (
     <main className={`p-10 ${inter.className}`}>
       <Head>
@@ -45,6 +57,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
             Notes
           </h2>
+          {user.email && <p>Notes from {user?.email}</p>}
         </div>
         <div className="mt-4 flex gap-2 md:ml-4 md:mt-0">
           <Button variant="secondary" disabled>
@@ -84,7 +97,7 @@ export default function Home() {
                     </a>
                   </h3>
                   <p className="mt-1 line-clamp-2 text-sm text-gray-600">
-                    {note.preview}
+                    {note.text}
                   </p>
                 </div>
               </li>
@@ -94,4 +107,25 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const supabase = createServerClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
