@@ -105,7 +105,7 @@ export default function Home({ user }: { user: User }) {
                         <span className="absolute inset-0" aria-hidden="true" />
                         {note.title}
                       </h3>
-                      <p className="mt-1 line-clamp-2 text-sm text-gray-600">
+                      <p className="mt-1 line-clamp-2 text-sm text-left text-gray-600">
                         {note.text.length > 100
                           ? `${note.text.slice(0, 100)}...`
                           : note.text}
@@ -114,14 +114,14 @@ export default function Home({ user }: { user: User }) {
                   </DrawerTrigger>
                   <DrawerContent>
                     <DrawerHeader>
-                      <DrawerTitle className="text-2xl">{note.title}</DrawerTitle>
-                      <DrawerDescription>
+                      <DrawerTitle className="text-2xl text-left">{note.title}</DrawerTitle>
+                      <DrawerDescription className="text-base text-left">
                         {note.text}
                       </DrawerDescription>
                     </DrawerHeader>
                     <DrawerFooter>
-                      <DrawerClose>
-                        <Button>Ok</Button>
+                      <DrawerClose className="text-left">
+                        <Button variant="secondary">Ok</Button>
                       </DrawerClose>
                     </DrawerFooter>
                   </DrawerContent>
