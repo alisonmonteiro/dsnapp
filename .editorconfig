@@ -1,0 +1,7 @@
+// .editorconfig for a nextjs project with 2 spaces
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
