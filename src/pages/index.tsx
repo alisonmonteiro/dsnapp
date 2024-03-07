@@ -10,6 +10,16 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import Head from "next/head";
 import { createClient as createServerClient } from "@/lib/utils/supabase/server";
 import { createClient } from "@/lib/utils/supabase/component";
@@ -17,7 +27,6 @@ import { GetServerSidePropsContext } from "next";
 import { useEffect, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
-
 
 interface Note {
   id: number;
@@ -85,21 +94,38 @@ export default function Home({ user }: { user: User }) {
       </div>
 
       <div className="w-full py-4">
-        <div className="mt-6 flow-root border border-red-500">
+        <div className="mt-6 flow-root">
           <ul role="list" className="-my-5 divide-y divide-gray-200">
             {notes.map((note) => (
               <li key={note.id} className="py-5">
-                <div className="relative focus-within:ring-2 focus-within:ring-indigo-500">
-                  <h3 className="text-base font-semibold text-gray-800">
-                    <a href="#" className="hover:underline focus:outline-none">
-                      <span className="absolute inset-0" aria-hidden="true" />
-                      {note.title}
-                    </a>
-                  </h3>
-                  <p className="mt-1 line-clamp-2 text-sm text-gray-600">
-                    {note.text}
-                  </p>
-                </div>
+                <Drawer>
+                  <DrawerTrigger>
+                    <div className="relative focus-within:ring-2 focus-within:ring-indigo-500">
+                      <h3 className="text-base text-left font-semibold hover:underline focus:outline-none text-gray-800">
+                        <span className="absolute inset-0" aria-hidden="true" />
+                        {note.title}
+                      </h3>
+                      <p className="mt-1 line-clamp-2 text-sm text-gray-600">
+                        {note.text.length > 100
+                          ? `${note.text.slice(0, 100)}...`
+                          : note.text}
+                      </p>
+                    </div>
+                  </DrawerTrigger>
+                  <DrawerContent>
+                    <DrawerHeader>
+                      <DrawerTitle className="text-2xl">{note.title}</DrawerTitle>
+                      <DrawerDescription>
+                        {note.text}
+                      </DrawerDescription>
+                    </DrawerHeader>
+                    <DrawerFooter>
+                      <DrawerClose>
+                        <Button>Ok</Button>
+                      </DrawerClose>
+                    </DrawerFooter>
+                  </DrawerContent>
+                </Drawer>
               </li>
             ))}
           </ul>
