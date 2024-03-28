@@ -24,54 +24,33 @@ import Head from "next/head";
 import { createClient as createServerClient } from "@/lib/utils/supabase/server";
 import { createClient } from "@/lib/utils/supabase/component";
 import { GetServerSidePropsContext } from "next";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useNotes } from "@/lib/hooks/use-notes";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const inter = Inter({ subsets: ["latin"] });
 
-interface Note {
-  id: number;
-  title: string;
-  text: string;
-  status: boolean;
-  uuid: string;
-  user_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export default function Home({ user }: { user: User }) {
   const supabase = createClient();
-  const [notes, setNotes] = useState<Note[]>([]);
-
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const { data, error } = await supabase.from("notes").select("*");
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-      setNotes(data);
-    };
-    fetchNotes();
-  }, []);
+  const router = useRouter();
+  const notes = useNotes();
+  const isUserAuthenticated = user?.id && user?.aud;
 
   return (
-    <main className={`p-10 ${inter.className}`}>
+    <main className={`p-4 md:p-10 w-screen h-screen ${inter.className}`}>
       <Head>
         <title>Notes</title>
       </Head>
-      <div className="flex items-center justify-between w-full">
+      <div className="md:flex items-center justify-between w-full">
         <div className="flex-1">
-          <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+          <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
             Notes
-          </h2>
+          </h1>
           {user.email && <p>Notes from {user?.email}</p>}
         </div>
         <div className="mt-4 flex gap-2 md:ml-4 md:mt-0">
-          <Button variant="secondary" disabled>
-            Sign in
-          </Button>
           <Dialog>
             <DialogTrigger asChild>
               <Button>Add</Button>
@@ -79,9 +58,15 @@ export default function Home({ user }: { user: User }) {
             <DialogContent className="sm:max-w-[1024px]">
               <DialogHeader>
                 <DialogTitle className="text-2xl">Add note</DialogTitle>
-                <DialogDescription>
-                  Make changes to your profile here. Click save when you're
-                  done.
+                <DialogDescription className="text-base pt-4">
+                  <Label htmlFor="note">Your note:</Label>
+                  <Textarea
+                    id="note"
+                    name="note"
+                    className="mt-1"
+                    placeholder="Title"
+                    required
+                  />
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4"></div>
@@ -90,6 +75,19 @@ export default function Home({ user }: { user: User }) {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {isUserAuthenticated ? (
+            <Button variant="secondary" onClick={() => {
+              supabase.auth.signOut();
+              router.push("/login");
+            }}>
+              Sign out
+            </Button>
+          ) : (
+            <Link href="/login">
+              <Button variant="secondary">Sign in</Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -121,7 +119,7 @@ export default function Home({ user }: { user: User }) {
                     </DrawerHeader>
                     <DrawerFooter>
                       <DrawerClose className="text-left">
-                        <Button variant="secondary">Ok</Button>
+                        <Button variant="secondary">Close</Button>
                       </DrawerClose>
                     </DrawerFooter>
                   </DrawerContent>
@@ -137,7 +135,6 @@ export default function Home({ user }: { user: User }) {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const supabase = createServerClient(context);
-
   const { data, error } = await supabase.auth.getUser();
 
   if (error || !data) {
