@@ -2,13 +2,8 @@ import { Inter } from "next/font/google";
 import type { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import {
-  DialogFooter,
-  DialogHeader,
   DialogTrigger,
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -27,8 +22,8 @@ import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useNotes } from "@/lib/hooks/use-notes";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { CreateNote } from "@/components/create-note";
+import { useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,6 +31,7 @@ export default function Home({ user }: { user: User }) {
   const supabase = createClient();
   const router = useRouter();
   const notes = useNotes();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const isUserAuthenticated = user?.id && user?.aud;
 
   return (
@@ -51,29 +47,11 @@ export default function Home({ user }: { user: User }) {
           {user.email && <p>Notes from {user?.email}</p>}
         </div>
         <div className="mt-4 flex gap-2 md:ml-4 md:mt-0">
-          <Dialog>
+          <Dialog open={isAddModalOpen}>
             <DialogTrigger asChild>
-              <Button>Add</Button>
+              <Button onClick={() => setIsAddModalOpen(true)}>Add</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[1024px]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">Add note</DialogTitle>
-                <DialogDescription className="text-base pt-4">
-                  <Label htmlFor="note">Your note:</Label>
-                  <Textarea
-                    id="note"
-                    name="note"
-                    className="mt-1"
-                    placeholder="Title"
-                    required
-                  />
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4"></div>
-              <DialogFooter>
-                <Button type="submit">Add</Button>
-              </DialogFooter>
-            </DialogContent>
+            <CreateNote onSubmit={() => setIsAddModalOpen(false)} />
           </Dialog>
 
           {isUserAuthenticated ? (
