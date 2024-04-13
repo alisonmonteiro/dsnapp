@@ -1,6 +1,6 @@
 # DSN App
 
-Dead Simple Notes App. A simple experiment created with Next.js, Tailwind, TypesSript, Shadcn/UI, and Supabase.
+Dead Simple Notes App. A simple experiment created with Next.js, Tailwind, TypeScript, Shadcn/UI, and Supabase. This was created to explore some of Supabase's functionalities.
 
 ## Getting Started
 
