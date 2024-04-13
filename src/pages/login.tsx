@@ -12,21 +12,26 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  async function logIn(
-    e: React.FormEvent<HTMLFormElement>
-  ) {
+  async function logIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    router.push("/");
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error(error);
+        setError(error.message || "An error occurred while logging in.");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/");
   }
 
   return (
@@ -62,7 +67,10 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <Button type="submit">Log in</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Loading..." : "Log in"}
+        </Button>
+        {error && <p className="text-red-500">{error}</p>}
       </form>
     </main>
   );
