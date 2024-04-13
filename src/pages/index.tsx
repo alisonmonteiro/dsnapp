@@ -23,15 +23,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useNotes } from "@/lib/hooks/use-notes";
 import { CreateNote } from "@/components/create-note";
-import { useState } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
-
 export default function Home({ user }: { user: User }) {
   const supabase = createClient();
   const router = useRouter();
-  const notes = useNotes();
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { notes, refreshNotes } = useNotes();
   const isUserAuthenticated = user?.id && user?.aud;
 
   return (
@@ -47,12 +44,7 @@ export default function Home({ user }: { user: User }) {
           {user.email && <p>Notes from {user?.email}</p>}
         </div>
         <div className="mt-4 flex gap-2 md:ml-4 md:mt-0">
-          <Dialog open={isAddModalOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsAddModalOpen(true)}>Add</Button>
-            </DialogTrigger>
-            <CreateNote onSubmit={() => setIsAddModalOpen(false)} />
-          </Dialog>
+          <CreateNote onAdd={refreshNotes} />
 
           {isUserAuthenticated ? (
             <Button variant="secondary" onClick={() => {

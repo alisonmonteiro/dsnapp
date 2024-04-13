@@ -16,18 +16,23 @@ export const useNotes = () => {
   const supabase = createClient();
   const [notes, setNotes] = useState<Note[]>([]);
 
-  useEffect(() => {
-    const fetchNotes = async () => {
-      const { data, error } = await supabase.from("notes").select("*");
+  const fetchNotes = async () => {
+    const { data, error } = await supabase.from("notes").select("*");
 
-      if (error) {
-        console.error(error);
-        return;
-      }
-      setNotes(data);
-    };
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setNotes(data);
+  };
+
+  useEffect(() => {
     fetchNotes();
   }, []);
 
-  return notes;
+  return {
+    notes,
+    refreshNotes: fetchNotes,
+  };
 };
